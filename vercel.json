@@ -19,8 +19,20 @@
       "dest": "/api/$1"
     },
     {
-      "src": "/(.*)",
+      "src": "/admin",
+      "dest": "/frontend/index.html"
+    },
+    {
+      "src": "/cardapio",
+      "dest": "/frontend/index.html"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
       "dest": "/frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/index.html"
     }
   ]
 } 
