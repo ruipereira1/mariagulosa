@@ -7,6 +7,10 @@
       "config": {
         "distDir": "dist"
       }
+    },
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -17,17 +21,6 @@
     {
       "src": "/(.*)",
       "dest": "/frontend/$1"
-    }
-  ],
-  "functions": {
-    "api/*.js": {
-      "maxDuration": 10
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/((?!api).*)",
-      "destination": "/frontend/$1"
     }
   ]
 } 
