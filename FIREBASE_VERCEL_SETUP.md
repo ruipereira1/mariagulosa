@@ -16,13 +16,15 @@ O projeto está **100% otimizado** para usar Firebase com Vercel:
 - Adicione as seguintes variáveis:
 
 ```env
-FIREBASE_API_KEY=AIzaSyCRyLCgUClshxZqQ3ZTRHx-6j26ucwVoRs
-FIREBASE_AUTH_DOMAIN=maria-gulosa-b460f.firebaseapp.com
-FIREBASE_PROJECT_ID=maria-gulosa-b460f
-FIREBASE_STORAGE_BUCKET=maria-gulosa-b460f.firebasestorage.app
-FIREBASE_MESSAGING_SENDER_ID=373372889835
-FIREBASE_APP_ID=1:373372889835:web:0577d99b04c94e75112cae
+FIREBASE_API_KEY=your_firebase_api_key_here
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
 ```
+
+> ⚠️ **IMPORTANTE**: Substitua os valores acima pelos seus dados reais do Firebase Console.
 
 ### 2. **Configuração Automática**
 - ✅ Se as variáveis não estiverem definidas, usa valores padrão

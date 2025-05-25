@@ -13,6 +13,14 @@ backend/dist/
 .env.local
 .env.production
 .env.development
+.env.test
+
+# Firebase private keys
+firebase-adminsdk-*.json
+serviceAccountKey.json
+
+# MongoDB credentials
+mongodb-credentials.json
 
 # Logs
 *.log

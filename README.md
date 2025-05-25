@@ -90,6 +90,15 @@ npm run dev
 npm run build
 ```
 
+## 🔒 Segurança
+
+Este projeto segue as melhores práticas de segurança:
+- ✅ Secrets protegidos com variáveis de ambiente
+- ✅ Validação de configuração obrigatória
+- ✅ .gitignore configurado corretamente
+
+Para mais detalhes, consulte [SECURITY.md](./SECURITY.md)
+
 ## 📄 Licença
 
 MIT License - Projeto desenvolvido para Maria Gulosa
