@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
   cakes: `${API_BASE_URL}/api/cakes`,
   orders: `${API_BASE_URL}/api/orders`,
   stats: `${API_BASE_URL}/api/stats`,
+  updateOrder: `${API_BASE_URL}/api/update-order`,
+  manageCakes: `${API_BASE_URL}/api/manage-cakes`,
 }
 
 // Configuração do Axios (se necessário)
