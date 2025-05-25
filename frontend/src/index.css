@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #FFF8E7 0%, #FFE5EC 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-rose-gold hover:bg-rose-gold/80 text-white font-medium py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-rose-gold border-2 border-rose-gold font-medium py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg;
+  }
+  
+  .card {
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 transition-all duration-300 hover:shadow-2xl hover:scale-105;
+  }
+  
+  .title-fancy {
+    @apply font-dancing text-4xl md:text-6xl text-chocolate text-center leading-tight;
+  }
+}

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="cakeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F4A6CD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB6C1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Base do bolo -->
+  <ellipse cx="50" cy="85" rx="35" ry="8" fill="#8B4513" opacity="0.3"/>
+  <rect x="15" y="45" width="70" height="40" rx="5" fill="url(#cakeGradient)"/>
+  
+  <!-- Cobertura -->
+  <ellipse cx="50" cy="45" rx="35" ry="8" fill="#FFF8E7"/>
+  
+  <!-- Decoração -->
+  <circle cx="35" cy="45" r="3" fill="#FFB6C1"/>
+  <circle cx="50" cy="42" r="3" fill="#98FB98"/>
+  <circle cx="65" cy="45" r="3" fill="#F3E5AB"/>
+  
+  <!-- Vela -->
+  <rect x="48" y="25" width="4" height="20" fill="#FFD700"/>
+  <ellipse cx="50" cy="22" rx="3" ry="5" fill="#FF4500"/>
+</svg> 

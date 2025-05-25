@@ -1,0 +1,13 @@
+{
+  "name": "maria-gulosa",
+  "version": "1.0.0",
+  "description": "Site da Maria Gulosa - Bolos artesanais",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "keywords": ["bolos", "confeitaria", "maria-gulosa"],
+  "author": "Maria Gulosa",
+  "license": "MIT"
+} 
