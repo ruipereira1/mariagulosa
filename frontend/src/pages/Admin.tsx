@@ -16,7 +16,7 @@ const Admin = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    // ⚠️ DEMO ONLY - Em produção, use autenticação real (JWT, OAuth, etc.)
+    // Autenticação local - Em produção, use JWT/OAuth
     if (credentials.username === 'maria' && credentials.password === 'julho2010') {
       setIsLoggedIn(true)
       loadDashboardData()
@@ -338,11 +338,7 @@ const Admin = () => {
             </button>
           </form>
 
-          <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs text-blue-800">
-              <strong>Demo:</strong> usuário: maria | senha: julho2010
-            </p>
-          </div>
+
         </div>
       </motion.div>
     </div>

@@ -61,7 +61,7 @@ mariagulosa/
 
 - **Home** (`/`) - Página inicial com apresentação
 - **Catálogo** (`/catalog`) - Todos os bolos disponíveis
-- **Admin** (`/admin`) - Painel administrativo (credenciais de demo)
+- **Admin** (`/admin`) - Painel administrativo
 
 ## 🎂 Catálogo de Bolos
 

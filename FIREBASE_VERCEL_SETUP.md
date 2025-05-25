@@ -136,9 +136,9 @@ service cloud.firestore {
 - ✅ **Breakdown por status** calculado dinamicamente
 - ✅ **Bolos mais populares** baseado em pedidos reais
 
-### **Login:**
-- **Usuário:** `maria`
-- **Senha:** `[senha de demonstração]`
+### **Acesso:**
+- Sistema de autenticação implementado
+- Credenciais configuradas localmente
 
 > ⚠️ **SEGURANÇA**: Em produção, implemente autenticação real com JWT ou OAuth.
 

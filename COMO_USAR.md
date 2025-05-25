@@ -36,12 +36,11 @@ Isso irá iniciar:
 - Clique no carrinho para pedir via WhatsApp
 
 ### 👨‍💼 Admin (/admin)
-- **Usuário**: maria
-- **Senha**: [senha de demonstração]
+- Sistema de autenticação implementado
 - Dashboard com estatísticas
 - Visão geral de pedidos
 
-> ⚠️ **NOTA**: Este é um sistema de demonstração. Em produção, implemente autenticação segura.
+> ⚠️ **NOTA**: Sistema com autenticação configurada localmente.
 
 ## 📱 Funcionalidades WhatsApp
 
