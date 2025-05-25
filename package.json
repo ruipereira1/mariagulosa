@@ -5,7 +5,9 @@
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
     "dev": "vercel dev",
-    "start": "vercel dev"
+    "start": "vercel dev",
+    "deploy": "vercel --prod",
+    "preview": "cd frontend && npm run preview"
   },
   "dependencies": {
     "firebase": "^10.7.1"
