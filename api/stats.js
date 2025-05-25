@@ -1,4 +1,7 @@
-// API Route para estatísticas - Vercel
+// API Route para estatísticas - Vercel + Firebase
+import { db } from '../lib/firebase.js';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+
 export default async function handler(req, res) {
   // Configurar CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,33 +15,68 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      // Simular estatísticas para o painel admin
-      // Em produção, estes dados viriam do banco de dados
-      
+      // Buscar estatísticas reais do Firebase
       const today = new Date();
       const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       
-      // Dados mock para demonstração
+      // Buscar todos os pedidos
+      const ordersRef = collection(db, 'orders');
+      const ordersSnapshot = await getDocs(ordersRef);
+      
+      // Buscar pedidos de hoje
+      const todayOrdersQuery = query(
+        ordersRef, 
+        where('createdAt', '>=', startOfDay.toISOString())
+      );
+      const todayOrdersSnapshot = await getDocs(todayOrdersQuery);
+      
+      // Calcular estatísticas
+      let totalRevenue = 0;
+      let todayRevenue = 0;
+      const statusBreakdown = {};
+      const popularCakes = {};
+      
+      ordersSnapshot.forEach((doc) => {
+        const order = doc.data();
+        totalRevenue += order.totalPrice || 0;
+        
+        // Contar status
+        const status = order.status || 'pendente';
+        statusBreakdown[status] = (statusBreakdown[status] || 0) + 1;
+        
+        // Contar bolos populares
+        if (order.items) {
+          order.items.forEach(item => {
+            const cakeName = item.cakeName;
+            popularCakes[cakeName] = (popularCakes[cakeName] || 0) + item.quantity;
+          });
+        }
+      });
+      
+      todayOrdersSnapshot.forEach((doc) => {
+        const order = doc.data();
+        todayRevenue += order.totalPrice || 0;
+      });
+      
+      // Converter para formato esperado
+      const statusBreakdownArray = Object.entries(statusBreakdown).map(([status, count]) => ({
+        _id: status,
+        count
+      }));
+      
+      const popularCakesArray = Object.entries(popularCakes)
+        .map(([name, orders]) => ({ name, orders }))
+        .sort((a, b) => b.orders - a.orders)
+        .slice(0, 6);
+      
       const stats = {
-        totalOrders: 15,
-        todayOrders: 3,
-        totalRevenue: 425.50,
-        todayRevenue: 79.00,
-        totalCakes: 6,
-        statusBreakdown: [
-          { _id: 'pendente', count: 2 },
-          { _id: 'confirmado', count: 1 },
-          { _id: 'pronto', count: 0 },
-          { _id: 'entregue', count: 12 }
-        ],
-        popularCakes: [
-          { name: 'Bolo de Chocolate', orders: 8 },
-          { name: 'Bolo de Morango', orders: 6 },
-          { name: 'Bolo Red Velvet', orders: 4 },
-          { name: 'Bolo de Cenoura', orders: 3 },
-          { name: 'Bolo de Limão', orders: 2 },
-          { name: 'Bolo de Coco', orders: 2 }
-        ],
+        totalOrders: ordersSnapshot.size,
+        todayOrders: todayOrdersSnapshot.size,
+        totalRevenue: totalRevenue,
+        todayRevenue: todayRevenue,
+        totalCakes: 6, // Número fixo de bolos no catálogo
+        statusBreakdown: statusBreakdownArray,
+        popularCakes: popularCakesArray,
         recentActivity: [
           {
             type: 'new_order',
@@ -58,12 +96,7 @@ export default async function handler(req, res) {
         ]
       };
 
-      // TODO: Integrar com banco de dados real
-      // if (process.env.FIREBASE_PROJECT_ID) {
-      //   stats = await getStatsFromFirebase();
-      // } else if (process.env.MONGODB_URI) {
-      //   stats = await getStatsFromMongoDB();
-      // }
+      // Estatísticas calculadas em tempo real do Firebase
 
       return res.status(200).json({
         success: true,

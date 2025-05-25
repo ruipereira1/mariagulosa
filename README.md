@@ -22,11 +22,13 @@ Site completo para a confeitaria Maria Gulosa, especializada em bolos artesanais
 
 ### Backend
 - **Vercel API Routes** (serverless)
+- **Firebase Firestore** (banco de dados)
 - **JavaScript ES6+**
 - **CORS** configurado
 
 ### Deploy
 - **Vercel** (frontend + backend)
+- **Firebase** (banco de dados)
 - **GitHub** (controle de versão)
 
 ## 🚀 Deploy
@@ -40,10 +42,12 @@ mariagulosa/
 │   ├── src/
 │   ├── public/
 │   └── package.json
-├── api/              # Backend API Routes
+├── api/              # Backend API Routes + Firebase
 │   ├── cakes.js      # Catálogo de bolos
 │   ├── orders.js     # Sistema de pedidos
 │   └── stats.js      # Estatísticas admin
+├── lib/              # Utilitários
+│   └── firebase.js   # Configuração Firebase
 ├── vercel.json       # Configuração Vercel
 └── package.json      # Scripts principais
 ```

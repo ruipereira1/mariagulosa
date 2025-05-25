@@ -1,4 +1,7 @@
-// API Route para pedidos - Vercel
+// API Route para pedidos - Vercel + Firebase
+import { db } from '../lib/firebase.js';
+import { collection, getDocs, addDoc, query, orderBy, limit } from 'firebase/firestore';
+
 export default async function handler(req, res) {
   // Configurar CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -60,21 +63,21 @@ export default async function handler(req, res) {
         updatedAt: now.toISOString()
       };
 
-      // Aqui você pode integrar com Firebase/MongoDB
-      // Por enquanto, apenas simular o salvamento
+      // Salvar no Firebase
+      const ordersRef = collection(db, 'orders');
+      const docRef = await addDoc(ordersRef, order);
+      
       console.log('📦 Novo pedido criado:', orderNumber);
       console.log('🛒 Itens:', order.items);
       console.log('💰 Total:', `€ ${totalPrice.toFixed(2)}`);
+      console.log('🔥 Salvo no Firebase:', docRef.id);
 
-      // TODO: Integrar com banco de dados
-      // if (process.env.FIREBASE_PROJECT_ID) {
-      //   // Salvar no Firebase
-      //   await saveToFirebase(order);
-      // }
-
-      return res.status(200).json({
+              return res.status(200).json({
         success: true,
-        order,
+        order: {
+          id: docRef.id,
+          ...order
+        },
         message: 'Pedido criado com sucesso!'
       });
 
@@ -90,29 +93,25 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      // Simular busca de pedidos (para o admin)
-      const { limit = 10 } = req.query;
+      // Buscar pedidos do Firebase
+      const { limit: limitParam = 10 } = req.query;
+      const ordersRef = collection(db, 'orders');
+      const q = query(ordersRef, orderBy('createdAt', 'desc'), limit(parseInt(limitParam)));
+      const snapshot = await getDocs(q);
       
-      // Dados mock para demonstração
-      const mockOrders = [
-        {
-          orderNumber: 'MG2412251234',
-          totalItems: 2,
-          totalPrice: 53.00,
-          status: 'pendente',
-          createdAt: new Date().toISOString(),
-          items: [
-            { cakeName: 'Bolo de Chocolate', quantity: 1 },
-            { cakeName: 'Bolo de Morango', quantity: 1 }
-          ],
-          customerInfo: { phone: '351914019142' }
-        }
-      ];
+      const orders = [];
+      snapshot.forEach((doc) => {
+        orders.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
 
       return res.status(200).json({
         success: true,
-        orders: mockOrders.slice(0, parseInt(limit)),
-        total: mockOrders.length
+        orders,
+        total: orders.length,
+        source: 'firebase'
       });
 
     } catch (error) {
