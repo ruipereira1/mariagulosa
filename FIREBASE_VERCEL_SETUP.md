@@ -138,7 +138,9 @@ service cloud.firestore {
 
 ### **Login:**
 - **Usuário:** `maria`
-- **Senha:** `gulosa123`
+- **Senha:** `[senha de demonstração]`
+
+> ⚠️ **SEGURANÇA**: Em produção, implemente autenticação real com JWT ou OAuth.
 
 ## 🎯 **Vantagens da Otimização**
 

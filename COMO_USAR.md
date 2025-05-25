@@ -37,9 +37,11 @@ Isso irá iniciar:
 
 ### 👨‍💼 Admin (/admin)
 - **Usuário**: maria
-- **Senha**: gulosa123
+- **Senha**: [senha de demonstração]
 - Dashboard com estatísticas
 - Visão geral de pedidos
+
+> ⚠️ **NOTA**: Este é um sistema de demonstração. Em produção, implemente autenticação segura.
 
 ## 📱 Funcionalidades WhatsApp
 

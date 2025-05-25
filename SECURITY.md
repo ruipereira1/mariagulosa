@@ -15,7 +15,7 @@ Este projeto foi atualizado para resolver os seguintes alertas de segurança:
 
 ```javascript
 // ❌ ERRADO - Secret hardcoded
-const apiKey = "AIzaSyCRyLCgUClshxZqQ3ZTRHx-6j26ucwVoRs";
+const apiKey = "AIzaSyExample_NEVER_DO_THIS_12345678901234";
 
 // ✅ CORRETO - Usando variável de ambiente
 const apiKey = process.env.FIREBASE_API_KEY;
@@ -74,7 +74,7 @@ Execute regularmente:
 git log --grep="password\|key\|secret" --oneline
 
 # Verificar arquivos que podem conter secrets
-grep -r "AIza\|mongodb+srv\|password" . --exclude-dir=node_modules
+grep -r "AIza\|mongodb+srv\|password\|secret" . --exclude-dir=node_modules
 ```
 
 ## 🔍 **Monitoramento**

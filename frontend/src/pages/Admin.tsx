@@ -16,7 +16,7 @@ const Admin = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    // Simulação de login simples
+    // ⚠️ DEMO ONLY - Em produção, use autenticação real (JWT, OAuth, etc.)
     if (credentials.username === 'maria' && credentials.password === 'gulosa123') {
       setIsLoggedIn(true)
       loadDashboardData()
