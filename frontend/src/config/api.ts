@@ -14,7 +14,7 @@ const isDevelopment = import.meta.env.DEV
 // Configuração atual baseada no ambiente
 export const API_BASE_URL = isDevelopment 
   ? API_CONFIG.development.baseURL 
-  : API_CONFIG.production.baseURL
+  : (typeof window !== 'undefined' ? window.location.origin : API_CONFIG.production.baseURL)
 
 // URLs completas da API
 export const API_ENDPOINTS = {
@@ -36,15 +36,5 @@ export const API_CONFIG_AXIOS = {
 
 // Log da configuração atual (apenas em desenvolvimento)
 if (isDevelopment) {
-  console.log('🔧 API Config (Vercel Dev):', {
-    environment: 'development',
-    baseURL: API_BASE_URL,
-    endpoints: API_ENDPOINTS
-  })
-} else {
-  console.log('🚀 API Config (Vercel Production):', {
-    environment: 'production',
-    baseURL: API_BASE_URL || 'same-domain',
-    endpoints: API_ENDPOINTS
-  })
+  console.log('🔧 API Config:', { environment: 'development', baseURL: API_BASE_URL })
 } 

@@ -38,8 +38,8 @@ const AddToCartModal = ({ cake, isOpen, onClose }: AddToCartModalProps) => {
     setQuantity(1)
     onClose()
     
-    // Show success message
-    alert(`${cake.name} adicionado à encomenda! 🎂`)
+    // TODO: Implementar toast notification aqui
+    // alert(`${cake.name} adicionado à encomenda! 🎂`)
   }
 
   const incrementQuantity = () => setQuantity(prev => prev + 1)

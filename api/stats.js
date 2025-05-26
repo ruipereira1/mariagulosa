@@ -14,6 +14,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  // Log da requisição
+  console.log(`📊 Stats API - ${req.method} ${req.url}`);
+
   if (req.method === 'GET') {
     try {
       // Verificar se o Firebase está disponível
@@ -117,6 +120,7 @@ export default async function handler(req, res) {
 
     } catch (error) {
       console.error('❌ Erro ao buscar estatísticas:', error);
+      console.error('Stack trace:', error.stack);
       
       // Retornar dados mock em caso de erro
       return res.status(200).json({
@@ -124,7 +128,8 @@ export default async function handler(req, res) {
         stats: getMockStats(),
         generatedAt: new Date().toISOString(),
         source: 'mock',
-        error: 'Firebase temporarily unavailable'
+        error: 'Firebase temporarily unavailable',
+        errorDetails: error.message
       });
     }
   }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Lock, User, Eye, EyeOff, RefreshCw } from 'lucide-react'
+import { Lock, User, Eye, EyeOff, RefreshCw, Plus, Edit, Trash2, Save, X, Package, BarChart3 } from 'lucide-react'
 import { API_ENDPOINTS } from '../config/api'
 
 const Admin = () => {
@@ -17,9 +17,15 @@ const Admin = () => {
   const [newCake, setNewCake] = useState({
     name: '',
     price: '',
-    description: ''
+    description: '',
+    image: '',
+    category: 'bolos'
   })
   const [notification, setNotification] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [cakes, setCakes] = useState<any[]>([])
+  const [editingCake, setEditingCake] = useState<any>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +34,44 @@ const Admin = () => {
       setIsLoggedIn(true)
       loadDashboardData()
     } else {
-      alert('Credenciais inválidas!')
+      showNotification('❌ Credenciais inválidas!')
+    }
+  }
+
+  const loadCakes = async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.manageCakes)
+      const data = await response.json()
+      
+      if (data.success) {
+        setCakes(data.cakes)
+      } else {
+        console.error('Erro ao carregar bolos:', data.error)
+        // Usar dados mock em caso de erro
+        setCakes([
+          {
+            id: '1',
+            name: 'Bolo de Chocolate',
+            price: 25.00,
+            description: 'Delicioso bolo de chocolate com cobertura cremosa',
+            image: '/images/cake-chocolate.jpg',
+            category: 'chocolate',
+            available: true
+          },
+          {
+            id: '2',
+            name: 'Bolo de Morango',
+            price: 28.00,
+            description: 'Bolo fofo com morangos frescos e chantilly',
+            image: '/images/cake-strawberry.jpg',
+            category: 'frutas',
+            available: true
+          }
+        ])
+      }
+    } catch (error) {
+      console.error('Erro ao carregar bolos:', error)
+      setCakes([])
     }
   }
 
@@ -37,14 +80,36 @@ const Admin = () => {
     try {
       // Buscar estatísticas
       const statsResponse = await fetch(API_ENDPOINTS.stats)
-      const statsData = await statsResponse.json()
+      if (!statsResponse.ok) {
+        throw new Error(`Stats API error: ${statsResponse.status}`)
+      }
+      const statsText = await statsResponse.text()
+      let statsData
+      try {
+        statsData = JSON.parse(statsText)
+      } catch (jsonError) {
+        console.error('Erro ao parsear JSON das estatísticas:', statsText)
+        throw new Error('Resposta inválida da API de estatísticas')
+      }
+      
       if (statsData.success) {
         setStats(statsData.stats)
       }
 
       // Buscar pedidos recentes
       const ordersResponse = await fetch(`${API_ENDPOINTS.orders}?limit=10`)
-      const ordersData = await ordersResponse.json()
+      if (!ordersResponse.ok) {
+        throw new Error(`Orders API error: ${ordersResponse.status}`)
+      }
+      const ordersText = await ordersResponse.text()
+      let ordersData
+      try {
+        ordersData = JSON.parse(ordersText)
+      } catch (jsonError) {
+        console.error('Erro ao parsear JSON dos pedidos:', ordersText)
+        throw new Error('Resposta inválida da API de pedidos')
+      }
+      
       if (ordersData.success) {
         setOrders(ordersData.orders)
       }
@@ -54,15 +119,49 @@ const Admin = () => {
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error)
+      console.error('Detalhes do erro:', error instanceof Error ? error.message : String(error))
+      
       // Usar dados mock em caso de erro
       setStats({
-        totalOrders: 0,
-        todayOrders: 0,
-        totalRevenue: 0,
-        todayRevenue: 0,
-        totalCakes: 6
+        totalOrders: 15,
+        todayOrders: 3,
+        totalRevenue: 850.00,
+        todayRevenue: 125.00,
+        totalCakes: 6,
+        statusBreakdown: [
+          { _id: 'pendente', count: 2 },
+          { _id: 'confirmado', count: 5 },
+          { _id: 'em_preparo', count: 3 },
+          { _id: 'pronto', count: 1 },
+          { _id: 'entregue', count: 4 }
+        ],
+        popularCakes: [
+          { name: 'Bolo de Chocolate', orders: 8 },
+          { name: 'Bolo de Morango', orders: 5 },
+          { name: 'Bolo Red Velvet', orders: 3 }
+        ]
       })
-      showNotification('Erro ao carregar dados. Usando dados locais.')
+      
+      setOrders([
+        {
+          orderNumber: 'MG2412251001',
+          status: 'pendente',
+          totalPrice: 45.00,
+          createdAt: new Date().toISOString(),
+          items: [{ cakeName: 'Bolo de Chocolate', quantity: 1 }],
+          customerInfo: { phone: '351914019142' }
+        },
+        {
+          orderNumber: 'MG2412251002',
+          status: 'confirmado',
+          totalPrice: 80.00,
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          items: [{ cakeName: 'Bolo de Morango', quantity: 2 }],
+          customerInfo: { phone: '351914019142' }
+        }
+      ])
+      
+      showNotification('⚠️ Modo offline ativo. Dados de demonstração carregados.')
     } finally {
       setLoading(false)
     }
@@ -79,7 +178,7 @@ const Admin = () => {
 
   const handleAddCake = () => {
     setShowAddCake(true)
-    setNewCake({ name: '', price: '', description: '' })
+    setNewCake({ name: '', price: '', description: '', image: '', category: 'bolos' })
   }
 
   const handleSaveCake = async () => {
@@ -100,7 +199,8 @@ const Admin = () => {
           name: newCake.name,
           price: parseFloat(newCake.price),
           description: newCake.description,
-          category: 'bolos',
+          image: newCake.image || '/images/default-cake.jpg',
+          category: newCake.category,
           available: true
         })
       })
@@ -110,15 +210,94 @@ const Admin = () => {
       if (data.success) {
         showNotification('Bolo adicionado com sucesso!')
         setShowAddCake(false)
-        setNewCake({ name: '', price: '', description: '' })
-        // Recarregar dados
-        loadDashboardData()
+        setNewCake({ name: '', price: '', description: '', image: '', category: 'bolos' })
+        loadCakes()
       } else {
         showNotification(`Erro: ${data.error}`)
       }
     } catch (error) {
       console.error('Erro ao adicionar bolo:', error)
       showNotification('Erro ao adicionar bolo')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEditCake = (cake: any) => {
+    setEditingCake(cake)
+    setShowEditModal(true)
+  }
+
+  const handleUpdateCake = async () => {
+    try {
+      if (!editingCake.name || !editingCake.price) {
+        showNotification('Nome e preço são obrigatórios!')
+        return
+      }
+
+      setLoading(true)
+
+      const response = await fetch(API_ENDPOINTS.manageCakes, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: editingCake.id,
+          name: editingCake.name,
+          price: parseFloat(editingCake.price),
+          description: editingCake.description,
+          image: editingCake.image,
+          category: editingCake.category,
+          available: editingCake.available
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        showNotification('Bolo atualizado com sucesso!')
+        setShowEditModal(false)
+        setEditingCake(null)
+        loadCakes()
+      } else {
+        showNotification(`Erro: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar bolo:', error)
+      showNotification('Erro ao atualizar bolo')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteCake = async (cakeId: string, cakeName: string) => {
+    if (!confirm(`Tem certeza que deseja remover o bolo "${cakeName}"?`)) {
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const response = await fetch(API_ENDPOINTS.manageCakes, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: cakeId })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        showNotification('Bolo removido com sucesso!')
+        loadCakes()
+      } else {
+        showNotification(`Erro: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Erro ao remover bolo:', error)
+      showNotification('Erro ao remover bolo')
     } finally {
       setLoading(false)
     }
@@ -234,7 +413,38 @@ const Admin = () => {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Sistema de Abas */}
+            <div className="mb-8">
+              <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                    activeTab === 'dashboard'
+                      ? 'bg-white text-chocolate shadow-sm'
+                      : 'text-gray-600 hover:text-chocolate'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Dashboard</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('cakes')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                    activeTab === 'cakes'
+                      ? 'bg-white text-chocolate shadow-sm'
+                      : 'text-gray-600 hover:text-chocolate'
+                  }`}
+                >
+                  <Package className="w-4 h-4" />
+                  <span>Gerenciar Bolos</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Conteúdo da Aba Dashboard */}
+            {activeTab === 'dashboard' && (
+              <>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Card de Pedidos Hoje */}
               <motion.div
                 className="card p-6 text-center"
@@ -478,6 +688,25 @@ const Admin = () => {
                       min="0"
                       className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-gold/50"
                     />
+                    <input
+                      type="url"
+                      placeholder="URL da imagem (opcional)"
+                      value={newCake.image}
+                      onChange={(e) => setNewCake({...newCake, image: e.target.value})}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-gold/50"
+                    />
+                    <select
+                      value={newCake.category}
+                      onChange={(e) => setNewCake({...newCake, category: e.target.value})}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-gold/50"
+                    >
+                      <option value="bolos">Bolos</option>
+                      <option value="chocolate">Chocolate</option>
+                      <option value="frutas">Frutas</option>
+                      <option value="especiais">Especiais</option>
+                      <option value="tradicionais">Tradicionais</option>
+                      <option value="tropical">Tropical</option>
+                    </select>
                     <textarea
                       placeholder="Descrição"
                       value={newCake.description}
@@ -499,6 +728,105 @@ const Admin = () => {
                         className="btn-secondary flex-1 disabled:opacity-50"
                       >
                         Cancelar
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {/* Modal de Editar Bolo */}
+            {showEditModal && editingCake && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                onClick={() => setShowEditModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-white rounded-2xl p-6 max-w-md w-full"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="font-dancing text-2xl text-chocolate mb-4">
+                    Editar Bolo
+                  </h3>
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Nome do bolo"
+                      value={editingCake.name}
+                      onChange={(e) => setEditingCake({...editingCake, name: e.target.value})}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-gold/50"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Preço (€)"
+                      value={editingCake.price}
+                      onChange={(e) => setEditingCake({...editingCake, price: e.target.value})}
+                      step="0.01"
+                      min="0"
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-gold/50"
+                    />
+                    <input
+                      type="url"
+                      placeholder="URL da imagem (opcional)"
+                      value={editingCake.image || ''}
+                      onChange={(e) => setEditingCake({...editingCake, image: e.target.value})}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-gold/50"
+                    />
+                    <select
+                      value={editingCake.category || 'bolos'}
+                      onChange={(e) => setEditingCake({...editingCake, category: e.target.value})}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-gold/50"
+                    >
+                      <option value="bolos">Bolos</option>
+                      <option value="chocolate">Chocolate</option>
+                      <option value="frutas">Frutas</option>
+                      <option value="especiais">Especiais</option>
+                      <option value="tradicionais">Tradicionais</option>
+                      <option value="tropical">Tropical</option>
+                    </select>
+                    <textarea
+                      placeholder="Descrição"
+                      value={editingCake.description || ''}
+                      onChange={(e) => setEditingCake({...editingCake, description: e.target.value})}
+                      rows={3}
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-gold/50"
+                    />
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="available"
+                        checked={editingCake.available}
+                        onChange={(e) => setEditingCake({...editingCake, available: e.target.checked})}
+                        className="w-4 h-4 text-rose-gold focus:ring-rose-gold border-gray-300 rounded"
+                      />
+                      <label htmlFor="available" className="text-sm font-medium text-gray-700">
+                        Disponível para venda
+                      </label>
+                    </div>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={handleUpdateCake}
+                        disabled={loading || !editingCake.name || !editingCake.price}
+                        className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>{loading ? 'Salvando...' : 'Salvar'}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowEditModal(false)
+                          setEditingCake(null)
+                        }}
+                        disabled={loading}
+                        className="btn-secondary flex-1 disabled:opacity-50 flex items-center justify-center space-x-2"
+                      >
+                        <X className="w-4 h-4" />
+                        <span>Cancelar</span>
                       </button>
                     </div>
                   </div>
@@ -569,6 +897,155 @@ const Admin = () => {
                 Os dados são sincronizados com as APIs do sistema e atualizados em tempo real.
               </p>
             </div>
+              </>
+            )}
+
+            {/* Conteúdo da Aba Gerenciar Bolos */}
+            {activeTab === 'cakes' && (
+              <div className="space-y-6">
+                {/* Cabeçalho da seção */}
+                <div className="flex justify-between items-center">
+                  <h2 className="font-dancing text-3xl text-chocolate">
+                    Gerenciar Bolos
+                  </h2>
+                  <button
+                    onClick={handleAddCake}
+                    className="btn-primary flex items-center space-x-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Adicionar Bolo</span>
+                  </button>
+                </div>
+
+                {/* Lista de Bolos */}
+                <div className="grid gap-4">
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-rose-gold" />
+                      <p className="text-gray-600">Carregando bolos...</p>
+                    </div>
+                  ) : cakes.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-6xl mb-4">🎂</div>
+                      <h3 className="text-xl font-semibold text-chocolate mb-2">
+                        Nenhum bolo cadastrado
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        Adicione seu primeiro bolo ao catálogo
+                      </p>
+                      <button
+                        onClick={handleAddCake}
+                        className="btn-primary"
+                      >
+                        Adicionar Primeiro Bolo
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {cakes.map((cake: any, index: number) => (
+                        <motion.div
+                          key={cake.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-center space-x-4">
+                            {/* Imagem do bolo */}
+                            <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                              {cake.image ? (
+                                <img
+                                  src={cake.image}
+                                  alt={cake.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none'
+                                  }}
+                                />
+                              ) : null}
+                              <div className="text-2xl">🎂</div>
+                            </div>
+
+                            {/* Informações do bolo */}
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-semibold text-chocolate text-lg">
+                                    {cake.name}
+                                  </h3>
+                                  <p className="text-gray-600 text-sm mt-1">
+                                    {cake.description}
+                                  </p>
+                                  <div className="flex items-center space-x-4 mt-2">
+                                    <span className="font-bold text-rose-gold">
+                                      € {typeof cake.price === 'number' ? cake.price.toFixed(2) : cake.price}
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                      Categoria: {cake.category}
+                                    </span>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      cake.available 
+                                        ? 'bg-green-100 text-green-800' 
+                                        : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      {cake.available ? 'Disponível' : 'Indisponível'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Botões de ação */}
+                                <div className="flex space-x-2">
+                                  <button
+                                    onClick={() => handleEditCake(cake)}
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    title="Editar bolo"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteCake(cake.id, cake.name)}
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Remover bolo"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Estatísticas dos bolos */}
+                <div className="grid md:grid-cols-3 gap-4 mt-8">
+                  <div className="card p-4 text-center">
+                    <div className="text-2xl mb-2">🎂</div>
+                    <h3 className="font-semibold text-chocolate">Total de Bolos</h3>
+                    <p className="text-2xl font-bold text-rose-gold">{cakes.length}</p>
+                  </div>
+                  <div className="card p-4 text-center">
+                    <div className="text-2xl mb-2">✅</div>
+                    <h3 className="font-semibold text-chocolate">Disponíveis</h3>
+                    <p className="text-2xl font-bold text-green-600">
+                      {cakes.filter(cake => cake.available).length}
+                    </p>
+                  </div>
+                  <div className="card p-4 text-center">
+                    <div className="text-2xl mb-2">💰</div>
+                    <h3 className="font-semibold text-chocolate">Preço Médio</h3>
+                    <p className="text-2xl font-bold text-rose-gold">
+                      € {cakes.length > 0 
+                        ? (cakes.reduce((sum, cake) => sum + (typeof cake.price === 'number' ? cake.price : parseFloat(cake.price) || 0), 0) / cakes.length).toFixed(2)
+                        : '0,00'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

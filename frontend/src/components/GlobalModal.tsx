@@ -23,8 +23,8 @@ const GlobalModal = () => {
     setQuantity(1)
     closeModal()
     
-    // Show success message
-    alert(`${selectedCake.name} adicionado à encomenda! 🎂`)
+    // Show success message (seria melhor usar toast, mas este modal será removido em favor do AddToCartModal)
+    // alert(`${selectedCake.name} adicionado à encomenda! 🎂`)
   }
 
   const handleClose = () => {

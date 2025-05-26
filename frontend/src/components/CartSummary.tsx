@@ -3,9 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingCart, X, Plus, Minus, MessageCircle, Trash2 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { API_ENDPOINTS } from '../config/api'
+import { CONTACTS } from '../config/contacts'
+import { useToast } from '../hooks/useToast'
+import Toast from './Toast'
 
 const CartSummary = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { toasts, showToast, hideToast } = useToast()
   const { 
     items, 
     getTotalItems, 
@@ -17,6 +22,9 @@ const CartSummary = () => {
   } = useCart()
 
   const handleSendToWhatsApp = async () => {
+    if (isLoading) return // Previne múltiplos cliques
+    
+    setIsLoading(true)
     try {
       const message = getWhatsAppMessage()
       
@@ -29,7 +37,7 @@ const CartSummary = () => {
           subtotal: parseFloat(item.price.replace(/[€\s]/g, '').replace(',', '.')) * item.quantity
         })),
         customerInfo: {
-          phone: "351914019142" // Número do WhatsApp
+          phone: CONTACTS.whatsapp.number
         },
         whatsappMessage: message,
         notes: "Pedido feito através do site"
@@ -50,11 +58,11 @@ const CartSummary = () => {
         console.log('✅ Pedido salvo no banco:', result.order?.orderNumber)
         
         // Abrir WhatsApp
-        const whatsappUrl = `https://wa.me/351914019142?text=${encodeURIComponent(message)}`
+        const whatsappUrl = `${CONTACTS.whatsapp.url}?text=${encodeURIComponent(message)}`
         window.open(whatsappUrl, '_blank')
         
         // Mostrar sucesso
-        alert(`🎉 Pedido ${result.order?.orderNumber || ''} criado com sucesso!\nRedirecionando para WhatsApp...`)
+        showToast(`🎉 Pedido ${result.order?.orderNumber || ''} criado com sucesso! Redirecionando para WhatsApp...`, 'success')
         
         // Limpar carrinho após enviar
         clearCart()
@@ -63,10 +71,10 @@ const CartSummary = () => {
         console.error('❌ Erro ao salvar pedido:', result.error)
         
         // Mesmo com erro no backend, ainda permite enviar WhatsApp
-        const whatsappUrl = `https://wa.me/351914019142?text=${encodeURIComponent(message)}`
+        const whatsappUrl = `${CONTACTS.whatsapp.url}?text=${encodeURIComponent(message)}`
         window.open(whatsappUrl, '_blank')
         
-        alert('⚠️ Pedido enviado para WhatsApp, mas houve um problema ao salvar no sistema.')
+        showToast('⚠️ Pedido enviado para WhatsApp, mas houve um problema ao salvar no sistema.', 'warning')
         
         clearCart()
         setIsOpen(false)
@@ -76,13 +84,15 @@ const CartSummary = () => {
       
       // Em caso de erro, ainda permite enviar WhatsApp
       const message = getWhatsAppMessage()
-      const whatsappUrl = `https://wa.me/351914019142?text=${encodeURIComponent(message)}`
+      const whatsappUrl = `${CONTACTS.whatsapp.url}?text=${encodeURIComponent(message)}`
       window.open(whatsappUrl, '_blank')
       
-      alert('⚠️ Pedido enviado para WhatsApp, mas houve um problema de conexão.')
+      showToast('⚠️ Pedido enviado para WhatsApp, mas houve um problema de conexão.', 'error')
       
       clearCart()
       setIsOpen(false)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -237,10 +247,20 @@ const CartSummary = () => {
                         
                         <button
                           onClick={handleSendToWhatsApp}
-                          className="flex-2 bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                          disabled={isLoading}
+                          className="flex-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                         >
-                          <MessageCircle className="w-5 h-5" />
-                          <span>Enviar Encomenda</span>
+                          {isLoading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                              <span>Enviando...</span>
+                            </>
+                          ) : (
+                            <>
+                              <MessageCircle className="w-5 h-5" />
+                              <span>Enviar Encomenda</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -251,6 +271,17 @@ const CartSummary = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Toast Notifications */}
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          isVisible={toast.isVisible}
+          onClose={() => hideToast(toast.id)}
+        />
+      ))}
     </>
   )
 }

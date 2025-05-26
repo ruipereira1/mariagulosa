@@ -99,6 +99,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const getTotalPrice = () => {
     return items.reduce((total, item) => {
       const price = parseFloat(item.price.replace(/[€\s]/g, '').replace(',', '.'))
+      // Validar se o preço é um número válido
+      if (isNaN(price) || price < 0) {
+        console.warn(`Preço inválido para item ${item.name}: ${item.price}`)
+        return total
+      }
       return total + (price * item.quantity)
     }, 0)
   }
@@ -109,10 +114,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     let message = 'Olá! Gostaria de fazer a seguinte encomenda:\n\n'
     
     items.forEach(item => {
+      const price = parseFloat(item.price.replace(/[€\s]/g, '').replace(',', '.'))
+      // Validar preço antes de processar
+      if (isNaN(price) || price < 0) {
+        console.warn(`Preço inválido para item ${item.name}: ${item.price}`)
+        return
+      }
+      
       message += `🎂 ${item.name}\n`
       message += `   Quantidade: ${item.quantity}\n`
       message += `   Preço unitário: ${item.price}\n`
-      message += `   Subtotal: € ${(parseFloat(item.price.replace(/[€\s]/g, '').replace(',', '.')) * item.quantity).toFixed(2).replace('.', ',')}\n\n`
+      message += `   Subtotal: € ${(price * item.quantity).toFixed(2).replace('.', ',')}\n\n`
     })
     
     message += `💰 Total: € ${getTotalPrice().toFixed(2).replace('.', ',')}\n\n`
