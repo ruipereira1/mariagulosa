@@ -14,7 +14,14 @@ const isDevelopment = import.meta.env.DEV
 // Configuração atual baseada no ambiente
 export const API_BASE_URL = isDevelopment 
   ? API_CONFIG.development.baseURL 
-  : (typeof window !== 'undefined' ? window.location.origin : API_CONFIG.production.baseURL)
+  : (typeof window !== 'undefined' ? window.location.origin : '')
+
+// Log da configuração para debug
+console.log('🔧 API Configuration:', {
+  isDevelopment,
+  API_BASE_URL,
+  windowOrigin: typeof window !== 'undefined' ? window.location.origin : 'undefined'
+})
 
 // URLs completas da API
 export const API_ENDPOINTS = {

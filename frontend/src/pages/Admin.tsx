@@ -10,6 +10,37 @@ import {
   exportCompleteReport 
 } from '../utils/exportUtils'
 
+// Dados de fallback para quando a API não estiver disponível
+const getFallbackCakes = () => [
+  {
+    id: 'fallback-1',
+    name: 'Bolo de Chocolate',
+    description: 'Delicioso bolo de chocolate com cobertura cremosa',
+    price: 25.00,
+    image: '/images/cake-chocolate.jpg',
+    category: 'chocolate',
+    available: true
+  },
+  {
+    id: 'fallback-2',
+    name: 'Bolo de Morango',
+    description: 'Bolo fofo com morangos frescos e chantilly',
+    price: 28.00,
+    image: '/images/cake-strawberry.jpg',
+    category: 'frutas',
+    available: true
+  },
+  {
+    id: 'fallback-3',
+    name: 'Bolo de Cenoura',
+    description: 'Tradicional bolo de cenoura com cobertura de chocolate',
+    price: 22.00,
+    image: '/images/cake-carrot.jpg',
+    category: 'tradicionais',
+    available: true
+  }
+]
+
 const Admin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [credentials, setCredentials] = useState({
@@ -49,20 +80,51 @@ const Admin = () => {
 
   const loadCakes = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.manageCakes)
-      const data = await response.json()
+      console.log('🔄 Carregando bolos da API:', API_ENDPOINTS.manageCakes)
+      
+      const response = await fetch(API_ENDPOINTS.manageCakes, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      })
+      
+      console.log('📊 Response status:', response.status)
+      console.log('📊 Response headers:', Object.fromEntries(response.headers.entries()))
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      
+      const responseText = await response.text()
+      console.log('📊 Raw response:', responseText.substring(0, 200) + '...')
+      
+      let data
+      try {
+        data = JSON.parse(responseText)
+      } catch (parseError) {
+        console.error('❌ Erro ao parsear JSON:', parseError)
+        console.error('❌ Response text:', responseText)
+        throw new Error(`Resposta inválida da API: ${responseText.substring(0, 100)}...`)
+      }
       
       if (data.success) {
         setCakes(data.cakes || [])
+        console.log('✅ Bolos carregados:', data.cakes?.length || 0)
       } else {
         console.error('Erro ao carregar bolos:', data.error)
-        setCakes([])
-        showNotification(`❌ Erro ao carregar bolos: ${data.error}`)
+        // Usar dados de fallback se disponíveis
+        const fallbackCakes = getFallbackCakes()
+        setCakes(fallbackCakes)
+        showNotification(`⚠️ Usando dados locais: ${data.error}`)
       }
     } catch (error) {
-      console.error('Erro ao carregar bolos:', error)
-      setCakes([])
-      showNotification(`❌ Erro ao carregar bolos: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+      console.error('❌ Erro ao carregar bolos:', error)
+      // Usar dados de fallback em caso de erro
+      const fallbackCakes = getFallbackCakes()
+      setCakes(fallbackCakes)
+      showNotification(`⚠️ API indisponível, usando dados locais: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     }
   }
 
