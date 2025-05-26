@@ -7,6 +7,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Content-Type', 'application/json');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -15,6 +16,15 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
+      // Verificar se o Firebase está disponível
+      if (!db) {
+        console.warn('⚠️ Firebase not available');
+        return res.status(503).json({
+          success: false,
+          error: 'Serviço temporariamente indisponível'
+        });
+      }
+
       const orderData = req.body;
 
       // Validar dados básicos
@@ -72,7 +82,7 @@ export default async function handler(req, res) {
       console.log('💰 Total:', `€ ${totalPrice.toFixed(2)}`);
       console.log('🔥 Salvo no Firebase:', docRef.id);
 
-              return res.status(200).json({
+      return res.status(200).json({
         success: true,
         order: {
           id: docRef.id,
@@ -93,6 +103,17 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
+      // Verificar se o Firebase está disponível
+      if (!db) {
+        console.warn('⚠️ Firebase not available, returning empty orders');
+        return res.status(200).json({
+          success: true,
+          orders: [],
+          total: 0,
+          source: 'mock'
+        });
+      }
+
       // Buscar pedidos do Firebase
       const { limit: limitParam = 10 } = req.query;
       const ordersRef = collection(db, 'orders');
@@ -116,9 +137,12 @@ export default async function handler(req, res) {
 
     } catch (error) {
       console.error('❌ Erro ao buscar pedidos:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Erro interno do servidor'
+      return res.status(200).json({
+        success: true,
+        orders: [],
+        total: 0,
+        source: 'mock',
+        error: 'Firebase temporarily unavailable'
       });
     }
   }

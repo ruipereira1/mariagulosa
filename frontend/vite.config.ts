@@ -15,15 +15,24 @@ export default defineConfig({
           ui: ['framer-motion', 'lucide-react']
         }
       }
-    }
+    },
+    target: 'es2015',
+    minify: 'terser'
   },
   base: '/',
   server: {
     port: 5173,
-    host: true
+    host: true,
+    cors: true
   },
   preview: {
     port: 4173,
-    host: true
+    host: true,
+    cors: true
+  },
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
   }
 })

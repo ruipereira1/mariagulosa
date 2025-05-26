@@ -7,7 +7,9 @@
     "dev": "vercel dev",
     "start": "vercel dev",
     "deploy": "vercel --prod",
-    "preview": "cd frontend && npm run preview"
+    "preview": "cd frontend && npm run preview",
+    "install-deps": "npm install && cd frontend && npm install",
+    "clean": "cd frontend && rm -rf dist node_modules && npm install"
   },
   "dependencies": {
     "firebase": "^10.7.1"

@@ -7,6 +7,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'PUT, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Content-Type', 'application/json');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -15,6 +16,15 @@ export default async function handler(req, res) {
 
   if (req.method === 'PUT' || req.method === 'PATCH') {
     try {
+      // Verificar se o Firebase está disponível
+      if (!db) {
+        console.warn('⚠️ Firebase not available');
+        return res.status(503).json({
+          success: false,
+          error: 'Serviço temporariamente indisponível'
+        });
+      }
+
       const { orderNumber, status, notes } = req.body;
 
       // Validar dados
@@ -26,7 +36,7 @@ export default async function handler(req, res) {
       }
 
       // Validar status permitidos
-      const allowedStatuses = ['pendente', 'confirmado', 'pronto', 'entregue', 'cancelado'];
+      const allowedStatuses = ['pendente', 'confirmado', 'em_preparo', 'pronto', 'entregue', 'cancelado'];
       if (!allowedStatuses.includes(status)) {
         return res.status(400).json({
           success: false,
