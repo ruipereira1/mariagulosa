@@ -1,5 +1,5 @@
 // API Route para gerenciar bolos - Vercel + Firebase
-import { db } from '../lib/firebase.js';
+import { db } from './_firebase.js';
 import { collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc } from 'firebase/firestore';
 
 export default async function handler(req, res) {

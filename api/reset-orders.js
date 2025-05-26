@@ -1,5 +1,5 @@
 // API Route para reset das encomendas - Vercel + Firebase
-import { db } from '../lib/firebase.js';
+import { db } from './_firebase.js';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
 export default async function handler(req, res) {

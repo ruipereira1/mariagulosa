@@ -1,5 +1,5 @@
 // API Route para atualizar pedidos - Vercel + Firebase
-import { db } from '../lib/firebase.js';
+import { db } from './_firebase.js';
 import { collection, doc, updateDoc, getDoc, query, where, getDocs } from 'firebase/firestore';
 
 export default async function handler(req, res) {

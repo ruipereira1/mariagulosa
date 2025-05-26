@@ -1,5 +1,5 @@
 // Script para popular a base de dados com bolos iniciais
-import { db } from '../lib/firebase.js';
+import { db } from './_firebase.js';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 
 const initialCakes = [
