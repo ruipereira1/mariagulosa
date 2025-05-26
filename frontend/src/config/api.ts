@@ -25,7 +25,7 @@ console.log('🔧 API Configuration:', {
 
 // URLs completas da API
 export const API_ENDPOINTS = {
-  cakes: `${API_BASE_URL}/api/cakes`,
+  cakes: `${API_BASE_URL}/api/manage-cakes`,
   orders: `${API_BASE_URL}/api/orders`,
   stats: `${API_BASE_URL}/api/stats`,
   updateOrder: `${API_BASE_URL}/api/update-order`,

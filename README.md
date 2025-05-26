@@ -1,15 +1,22 @@
-# 🎂 Maria Gulosa - Bolos Artesanais
+# 🎂 Maria Gulosa - Confeitaria Online
 
-Site completo para a confeitaria Maria Gulosa, especializada em bolos artesanais deliciosos.
+Sistema completo de confeitaria com catálogo de bolos, carrinho de compras e painel administrativo otimizado.
 
 ## 🌟 Funcionalidades
 
-- ✅ **Catálogo de Bolos**: 6 bolos artesanais únicos
-- ✅ **Carrinho de Compras**: Sistema completo de encomendas
-- ✅ **Integração WhatsApp**: Pedidos enviados diretamente
-- ✅ **Painel Admin**: Gestão de pedidos e estatísticas
+### **🛍️ Loja Online**
+- ✅ **Catálogo Interativo**: 6 bolos artesanais com filtros
+- ✅ **Carrinho Inteligente**: Sistema completo de encomendas
+- ✅ **WhatsApp Integration**: Pedidos enviados automaticamente
 - ✅ **Design Responsivo**: Funciona em todos os dispositivos
-- ✅ **Performance Otimizada**: Carregamento rápido
+- ✅ **Performance Otimizada**: Bundle splitting + lazy loading
+
+### **👨‍💼 Painel Administrativo**
+- ✅ **Dashboard em Tempo Real**: Estatísticas e métricas
+- ✅ **Gestão de Bolos**: CRUD completo do catálogo
+- ✅ **Controle de Pedidos**: Status e acompanhamento
+- ✅ **Exportação**: Relatórios em PDF e Excel
+- ✅ **Sistema de Fallback**: Funciona mesmo offline
 
 ## 🏗️ Tecnologias
 
@@ -53,9 +60,10 @@ mariagulosa/
 ```
 
 ### URLs da API
-- `/api/cakes` - Lista todos os bolos
+- `/api/manage-cakes` - CRUD completo de bolos
 - `/api/orders` - Criar e listar pedidos
 - `/api/stats` - Estatísticas para admin
+- `/api/update-order` - Atualizar status de pedidos
 
 ## 📱 Páginas
 
@@ -80,14 +88,69 @@ mariagulosa/
 ## 🔧 Desenvolvimento Local
 
 ```bash
-# Instalar dependências
+# 1. Instalar dependências
 npm install
 
-# Desenvolvimento com Vercel
-npm run dev
+# 2. Configurar Firebase (OBRIGATÓRIO)
+# Windows:
+./setup-firebase.ps1
+# Linux/Mac:
+chmod +x setup-firebase.sh && ./setup-firebase.sh
 
-# Build para produção
+# 3. Configurar Vercel
+vercel link --yes
+
+# 4. Desenvolvimento local
+npm run dev
+# ou
+vercel dev
+
+# 5. Build para produção
 npm run build
+
+# 6. Deploy
+vercel --prod
+```
+
+## 🔒 **Configuração de Segurança**
+
+### **Firebase (Obrigatório)**
+```bash
+# Configuração automática
+./setup-firebase.ps1  # Windows
+./setup-firebase.sh   # Linux/Mac
+
+# Ou manual
+cp firebase.env.template .env.local
+```
+
+### **Vercel (Produção)**
+Configure as variáveis de ambiente no dashboard:
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+
+## 🚨 Resolução de Problemas
+
+### **Erro: "Unexpected token 'T'"**
+- **Causa**: API retornando HTML em vez de JSON
+- **Solução**: Sistema de fallback automático ativo
+- **Debug**: Verificar console do navegador (F12)
+- **Documentação**: Ver `API_TROUBLESHOOTING.md`
+
+### **APIs não funcionando**
+```bash
+# Verificar deploy
+vercel ls
+
+# Testar endpoints
+curl https://seu-site.vercel.app/api/manage-cakes
+
+# Verificar logs
+vercel logs
 ```
 
 ## 🔒 Segurança

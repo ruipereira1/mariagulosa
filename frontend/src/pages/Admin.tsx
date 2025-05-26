@@ -9,37 +9,7 @@ import {
   exportCakesToExcel, 
   exportCompleteReport 
 } from '../utils/exportUtils'
-
-// Dados de fallback para quando a API não estiver disponível
-const getFallbackCakes = () => [
-  {
-    id: 'fallback-1',
-    name: 'Bolo de Chocolate',
-    description: 'Delicioso bolo de chocolate com cobertura cremosa',
-    price: 25.00,
-    image: '/images/cake-chocolate.jpg',
-    category: 'chocolate',
-    available: true
-  },
-  {
-    id: 'fallback-2',
-    name: 'Bolo de Morango',
-    description: 'Bolo fofo com morangos frescos e chantilly',
-    price: 28.00,
-    image: '/images/cake-strawberry.jpg',
-    category: 'frutas',
-    available: true
-  },
-  {
-    id: 'fallback-3',
-    name: 'Bolo de Cenoura',
-    description: 'Tradicional bolo de cenoura com cobertura de chocolate',
-    price: 22.00,
-    image: '/images/cake-carrot.jpg',
-    category: 'tradicionais',
-    available: true
-  }
-]
+import { DEFAULT_CAKES } from '../data/defaultCakes'
 
 const Admin = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -115,15 +85,13 @@ const Admin = () => {
       } else {
         console.error('Erro ao carregar bolos:', data.error)
         // Usar dados de fallback se disponíveis
-        const fallbackCakes = getFallbackCakes()
-        setCakes(fallbackCakes)
+        setCakes(DEFAULT_CAKES)
         showNotification(`⚠️ Usando dados locais: ${data.error}`)
       }
     } catch (error) {
       console.error('❌ Erro ao carregar bolos:', error)
       // Usar dados de fallback em caso de erro
-      const fallbackCakes = getFallbackCakes()
-      setCakes(fallbackCakes)
+      setCakes(DEFAULT_CAKES)
       showNotification(`⚠️ API indisponível, usando dados locais: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     }
   }

@@ -43,4 +43,4 @@ Write-Host ""
 Write-Host "🎉 Deploy concluído!" -ForegroundColor Green
 Write-Host "📱 Acesse seu site em: https://maria-gulosa.vercel.app" -ForegroundColor Cyan
 Write-Host "⚙️ Configure as variáveis de ambiente no Vercel Dashboard" -ForegroundColor Yellow
-Write-Host "📖 Consulte DEPLOY_VERCEL.md para instruções detalhadas" -ForegroundColor Cyan 
+Write-Host "📖 Consulte README.md para instruções detalhadas" -ForegroundColor Cyan 
