@@ -12,12 +12,20 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['framer-motion', 'lucide-react']
+          ui: ['framer-motion', 'lucide-react'],
+          utils: ['html2canvas', 'jspdf', 'xlsx']
         }
       }
     },
-    target: 'es2015',
-    minify: 'terser'
+    target: 'es2020',
+    minify: 'terser',
+    chunkSizeWarningLimit: 1000,
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
   },
   base: '/',
   server: {

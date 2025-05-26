@@ -100,7 +100,7 @@ const Admin = () => {
       try {
         statsData = JSON.parse(statsText)
         console.log('📊 Stats Parsed:', statsData)
-      } catch (jsonError) {
+      } catch {
         console.error('❌ Erro ao parsear JSON das estatísticas:', statsText)
         throw new Error('Resposta inválida da API de estatísticas')
       }
@@ -139,7 +139,7 @@ const Admin = () => {
       try {
         ordersData = JSON.parse(ordersText)
         console.log('📦 Orders Parsed:', ordersData)
-      } catch (jsonError) {
+      } catch {
         console.error('❌ Erro ao parsear JSON dos pedidos:', ordersText)
         throw new Error('Resposta inválida da API de pedidos')
       }
