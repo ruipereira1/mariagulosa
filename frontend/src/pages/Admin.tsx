@@ -436,8 +436,16 @@ const Admin = () => {
   useEffect(() => {
     if (isLoggedIn) {
       loadDashboardData()
+      loadCakes() // Carregar bolos também no login
     }
   }, [isLoggedIn])
+
+  // Carregar bolos quando mudar para a aba de gerenciamento
+  useEffect(() => {
+    if (isLoggedIn && activeTab === 'cakes') {
+      loadCakes()
+    }
+  }, [activeTab, isLoggedIn])
 
   // Fechar menu de exportação ao clicar fora
   useEffect(() => {

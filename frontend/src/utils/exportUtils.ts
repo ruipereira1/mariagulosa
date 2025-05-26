@@ -47,6 +47,14 @@ interface StatsData {
 
 // Exportar pedidos para PDF
 export const exportOrdersToPDF = (orders: OrderData[], stats: StatsData) => {
+  // Validar dados de entrada
+  if (!orders || !Array.isArray(orders)) {
+    throw new Error('Dados de pedidos inválidos')
+  }
+  if (!stats) {
+    throw new Error('Dados de estatísticas inválidos')
+  }
+
   const doc = new jsPDF()
   
   // Cabeçalho
@@ -104,6 +112,11 @@ export const exportOrdersToPDF = (orders: OrderData[], stats: StatsData) => {
 
 // Exportar bolos para PDF
 export const exportCakesToPDF = (cakes: CakeData[]) => {
+  // Validar dados de entrada
+  if (!cakes || !Array.isArray(cakes)) {
+    throw new Error('Dados de bolos inválidos')
+  }
+
   const doc = new jsPDF()
   
   // Cabeçalho
@@ -117,7 +130,7 @@ export const exportCakesToPDF = (cakes: CakeData[]) => {
   
   // Estatísticas
   const availableCakes = cakes.filter(cake => cake.available).length
-  const avgPrice = cakes.reduce((sum, cake) => sum + cake.price, 0) / cakes.length
+  const avgPrice = cakes.length > 0 ? cakes.reduce((sum, cake) => sum + cake.price, 0) / cakes.length : 0
   
   doc.setFontSize(14)
   doc.setTextColor(0, 0, 0)
@@ -160,6 +173,14 @@ export const exportCakesToPDF = (cakes: CakeData[]) => {
 
 // Exportar pedidos para Excel
 export const exportOrdersToExcel = (orders: OrderData[], stats: StatsData) => {
+  // Validar dados de entrada
+  if (!orders || !Array.isArray(orders)) {
+    throw new Error('Dados de pedidos inválidos')
+  }
+  if (!stats) {
+    throw new Error('Dados de estatísticas inválidos')
+  }
+
   // Planilha de pedidos
   const ordersData = orders.map(order => ({
     'Número do Pedido': order.orderNumber,
@@ -201,6 +222,11 @@ export const exportOrdersToExcel = (orders: OrderData[], stats: StatsData) => {
 
 // Exportar bolos para Excel
 export const exportCakesToExcel = (cakes: CakeData[]) => {
+  // Validar dados de entrada
+  if (!cakes || !Array.isArray(cakes)) {
+    throw new Error('Dados de bolos inválidos')
+  }
+
   const cakesData = cakes.map(cake => ({
     'ID': cake.id,
     'Nome': cake.name,
