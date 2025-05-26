@@ -33,8 +33,8 @@ const CartSummary = () => {
         items: items.map(item => ({
           cakeName: item.name,
           quantity: item.quantity,
-          unitPrice: parseFloat(item.price.replace(/[€\s]/g, '').replace(',', '.')),
-          subtotal: parseFloat(item.price.replace(/[€\s]/g, '').replace(',', '.')) * item.quantity
+          unitPrice: parseFloat(String(item.price).replace(/[€\s]/g, '').replace(',', '.')),
+          subtotal: parseFloat(String(item.price).replace(/[€\s]/g, '').replace(',', '.')) * item.quantity
         })),
         customerInfo: {
           phone: CONTACTS.whatsapp.number

@@ -12,9 +12,9 @@ const GlobalModal = () => {
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
       addItem({
-        id: selectedCake.id,
+        id: Number(selectedCake.id),
         name: selectedCake.name,
-        price: selectedCake.price,
+        price: String(selectedCake.price),
         image: selectedCake.image
       })
     }
@@ -35,7 +35,7 @@ const GlobalModal = () => {
   const incrementQuantity = () => setQuantity(prev => prev + 1)
   const decrementQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1)
 
-  const totalPrice = parseFloat(selectedCake.price.replace(/[€\s]/g, '').replace(',', '.')) * quantity
+  const totalPrice = parseFloat(String(selectedCake.price).replace(/[€\s]/g, '').replace(',', '.')) * quantity
 
   return (
     <AnimatePresence>
@@ -85,7 +85,7 @@ const GlobalModal = () => {
                   {selectedCake.price}
                 </span>
                 <div className="flex items-center">
-                  {[...Array(selectedCake.rating)].map((_, i) => (
+                  {selectedCake.rating && [...Array(selectedCake.rating)].map((_, i) => (
                     <span key={i} className="text-yellow-400 text-lg">⭐</span>
                   ))}
                 </div>

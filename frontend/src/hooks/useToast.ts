@@ -1,14 +1,12 @@
 import { useState, useCallback } from 'react'
-
-interface ToastState {
-  id: string
-  message: string
-  type: 'success' | 'error' | 'warning' | 'info'
-  isVisible: boolean
-}
+import { ToastState } from '../types'
 
 export const useToast = () => {
   const [toasts, setToasts] = useState<ToastState[]>([])
+
+  const hideToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id))
+  }, [])
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
     const id = Date.now().toString()
@@ -27,11 +25,7 @@ export const useToast = () => {
     }, 5000)
 
     return id
-  }, [])
-
-  const hideToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
-  }, [])
+  }, [hideToast])
 
   const hideAllToasts = useCallback(() => {
     setToasts([])

@@ -1,26 +1,19 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
-
-interface CartItem {
-  id: number
-  name: string
-  price: string
-  quantity: number
-  image?: string
-}
+import { CartItem, CakeData } from '../types'
 
 interface CartContextType {
   items: CartItem[]
   addItem: (item: Omit<CartItem, 'quantity'>) => void
-  removeItem: (id: number) => void
-  updateQuantity: (id: number, quantity: number) => void
+  removeItem: (id: number | string) => void
+  updateQuantity: (id: number | string, quantity: number) => void
   clearCart: () => void
   getTotalItems: () => number
   getTotalPrice: () => number
   getWhatsAppMessage: () => string
   // Modal management
-  selectedCake: any | null
+  selectedCake: CakeData | null
   isModalOpen: boolean
-  openModal: (cake: any) => void
+  openModal: (cake: CakeData) => void
   closeModal: () => void
 }
 
@@ -40,10 +33,10 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([])
-  const [selectedCake, setSelectedCake] = useState<any | null>(null)
+  const [selectedCake, setSelectedCake] = useState<CakeData | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const openModal = (cake: any) => {
+  const openModal = (cake: CakeData) => {
     setSelectedCake(cake)
     setIsModalOpen(true)
   }
@@ -71,11 +64,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     })
   }
 
-  const removeItem = (id: number) => {
+  const removeItem = (id: number | string) => {
     setItems(prevItems => prevItems.filter(item => item.id !== id))
   }
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (id: number | string, quantity: number) => {
     if (quantity <= 0) {
       removeItem(id)
       return
@@ -98,7 +91,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const getTotalPrice = () => {
     return items.reduce((total, item) => {
-      const price = parseFloat(item.price.replace(/[€\s]/g, '').replace(',', '.'))
+      const price = parseFloat(String(item.price).replace(/[€\s]/g, '').replace(',', '.'))
       // Validar se o preço é um número válido
       if (isNaN(price) || price < 0) {
         console.warn(`Preço inválido para item ${item.name}: ${item.price}`)
@@ -114,7 +107,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     let message = 'Olá! Gostaria de fazer a seguinte encomenda:\n\n'
     
     items.forEach(item => {
-      const price = parseFloat(item.price.replace(/[€\s]/g, '').replace(',', '.'))
+      const price = parseFloat(String(item.price).replace(/[€\s]/g, '').replace(',', '.'))
       // Validar preço antes de processar
       if (isNaN(price) || price < 0) {
         console.warn(`Preço inválido para item ${item.name}: ${item.price}`)
