@@ -53,126 +53,120 @@ const Admin = () => {
       const data = await response.json()
       
       if (data.success) {
-        setCakes(data.cakes)
+        setCakes(data.cakes || [])
       } else {
         console.error('Erro ao carregar bolos:', data.error)
-        // Usar dados mock em caso de erro
-        setCakes([
-          {
-            id: '1',
-            name: 'Bolo de Chocolate',
-            price: 25.00,
-            description: 'Delicioso bolo de chocolate com cobertura cremosa',
-            image: '/images/cake-chocolate.jpg',
-            category: 'chocolate',
-            available: true
-          },
-          {
-            id: '2',
-            name: 'Bolo de Morango',
-            price: 28.00,
-            description: 'Bolo fofo com morangos frescos e chantilly',
-            image: '/images/cake-strawberry.jpg',
-            category: 'frutas',
-            available: true
-          }
-        ])
+        setCakes([])
+        showNotification(`❌ Erro ao carregar bolos: ${data.error}`)
       }
     } catch (error) {
       console.error('Erro ao carregar bolos:', error)
       setCakes([])
+      showNotification(`❌ Erro ao carregar bolos: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     }
   }
 
   const loadDashboardData = async (showSuccessNotification = false) => {
     setLoading(true)
+    console.log('🔄 Carregando dados do dashboard...')
+    console.log('📍 API Base URL:', API_ENDPOINTS.stats)
+    
     try {
-      // Buscar estatísticas
-      const statsResponse = await fetch(API_ENDPOINTS.stats)
+      // Buscar estatísticas com timeout
+      console.log('📊 Buscando estatísticas...')
+      const statsController = new AbortController()
+      const statsTimeout = setTimeout(() => statsController.abort(), 10000)
+      
+      const statsResponse = await fetch(API_ENDPOINTS.stats, {
+        signal: statsController.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      })
+      clearTimeout(statsTimeout)
+      
+      console.log('📊 Stats Response Status:', statsResponse.status)
+      console.log('📊 Stats Response Headers:', Object.fromEntries(statsResponse.headers.entries()))
+      
       if (!statsResponse.ok) {
-        throw new Error(`Stats API error: ${statsResponse.status}`)
+        throw new Error(`Stats API error: ${statsResponse.status} - ${statsResponse.statusText}`)
       }
+      
       const statsText = await statsResponse.text()
+      console.log('📊 Stats Raw Response:', statsText.substring(0, 200) + '...')
+      
       let statsData
       try {
         statsData = JSON.parse(statsText)
+        console.log('📊 Stats Parsed:', statsData)
       } catch (jsonError) {
-        console.error('Erro ao parsear JSON das estatísticas:', statsText)
+        console.error('❌ Erro ao parsear JSON das estatísticas:', statsText)
         throw new Error('Resposta inválida da API de estatísticas')
       }
       
       if (statsData.success) {
         setStats(statsData.stats)
+        console.log('✅ Estatísticas carregadas com sucesso')
+      } else {
+        throw new Error(`Stats API returned error: ${statsData.error}`)
       }
 
-      // Buscar pedidos recentes
-      const ordersResponse = await fetch(`${API_ENDPOINTS.orders}?limit=10`)
+      // Buscar pedidos recentes com timeout
+      console.log('📦 Buscando pedidos...')
+      const ordersController = new AbortController()
+      const ordersTimeout = setTimeout(() => ordersController.abort(), 10000)
+      
+      const ordersResponse = await fetch(`${API_ENDPOINTS.orders}?limit=10`, {
+        signal: ordersController.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      })
+      clearTimeout(ordersTimeout)
+      
+      console.log('📦 Orders Response Status:', ordersResponse.status)
+      
       if (!ordersResponse.ok) {
-        throw new Error(`Orders API error: ${ordersResponse.status}`)
+        throw new Error(`Orders API error: ${ordersResponse.status} - ${ordersResponse.statusText}`)
       }
+      
       const ordersText = await ordersResponse.text()
+      console.log('📦 Orders Raw Response:', ordersText.substring(0, 200) + '...')
+      
       let ordersData
       try {
         ordersData = JSON.parse(ordersText)
+        console.log('📦 Orders Parsed:', ordersData)
       } catch (jsonError) {
-        console.error('Erro ao parsear JSON dos pedidos:', ordersText)
+        console.error('❌ Erro ao parsear JSON dos pedidos:', ordersText)
         throw new Error('Resposta inválida da API de pedidos')
       }
       
       if (ordersData.success) {
-        setOrders(ordersData.orders)
+        setOrders(ordersData.orders || [])
+        console.log('✅ Pedidos carregados com sucesso')
+      } else {
+        throw new Error(`Orders API returned error: ${ordersData.error}`)
       }
       
       if (showSuccessNotification) {
-        showNotification('Dados atualizados com sucesso!')
+        showNotification('✅ Dados atualizados com sucesso!')
       }
+      
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-      console.error('Detalhes do erro:', error instanceof Error ? error.message : String(error))
+      console.error('❌ Erro ao carregar dados:', error)
+      console.error('❌ Detalhes do erro:', error instanceof Error ? error.message : String(error))
       
-      // Usar dados mock em caso de erro
-      setStats({
-        totalOrders: 15,
-        todayOrders: 3,
-        totalRevenue: 850.00,
-        todayRevenue: 125.00,
-        totalCakes: 6,
-        statusBreakdown: [
-          { _id: 'pendente', count: 2 },
-          { _id: 'confirmado', count: 5 },
-          { _id: 'em_preparo', count: 3 },
-          { _id: 'pronto', count: 1 },
-          { _id: 'entregue', count: 4 }
-        ],
-        popularCakes: [
-          { name: 'Bolo de Chocolate', orders: 8 },
-          { name: 'Bolo de Morango', orders: 5 },
-          { name: 'Bolo Red Velvet', orders: 3 }
-        ]
-      })
+      // Não usar dados mock - apenas mostrar erro
+      setStats(null)
+      setOrders([])
       
-      setOrders([
-        {
-          orderNumber: 'MG2412251001',
-          status: 'pendente',
-          totalPrice: 45.00,
-          createdAt: new Date().toISOString(),
-          items: [{ cakeName: 'Bolo de Chocolate', quantity: 1 }],
-          customerInfo: { phone: '351914019142' }
-        },
-        {
-          orderNumber: 'MG2412251002',
-          status: 'confirmado',
-          totalPrice: 80.00,
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          items: [{ cakeName: 'Bolo de Morango', quantity: 2 }],
-          customerInfo: { phone: '351914019142' }
-        }
-      ])
-      
-      showNotification('⚠️ Modo offline ativo. Dados de demonstração carregados.')
+      showNotification(`❌ Erro ao carregar dados: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     } finally {
       setLoading(false)
+      console.log('🏁 Carregamento finalizado')
     }
   }
 
@@ -546,10 +540,10 @@ const Admin = () => {
                   Pedidos Hoje
                 </h3>
                 <p className="text-3xl font-bold text-rose-gold">
-                  {loading ? '...' : stats?.todayOrders || 0}
+                  {loading ? '...' : stats ? stats.todayOrders : '❌'}
                 </p>
                 <p className="text-gray-600 text-sm">
-                  Total: {stats?.totalOrders || 0}
+                  Total: {stats ? stats.totalOrders : 'Erro'}
                 </p>
               </motion.div>
 
@@ -563,10 +557,10 @@ const Admin = () => {
                   Vendas Hoje
                 </h3>
                 <p className="text-3xl font-bold text-rose-gold">
-                  {loading ? '...' : `€ ${stats?.todayRevenue?.toFixed(2) || '0,00'}`}
+                  {loading ? '...' : stats ? `€ ${stats.todayRevenue?.toFixed(2) || '0,00'}` : '❌'}
                 </p>
                 <p className="text-gray-600 text-sm">
-                  Total: € {stats?.totalRevenue?.toFixed(2) || '0,00'}
+                  Total: {stats ? `€ ${stats.totalRevenue?.toFixed(2) || '0,00'}` : 'Erro'}
                 </p>
               </motion.div>
 
@@ -580,7 +574,7 @@ const Admin = () => {
                   Bolos Ativos
                 </h3>
                 <p className="text-3xl font-bold text-rose-gold">
-                  {loading ? '...' : stats?.totalCakes || 8}
+                  {loading ? '...' : stats ? stats.totalCakes : '❌'}
                 </p>
                 <p className="text-gray-600 text-sm">Catálogo ativo</p>
               </motion.div>
@@ -595,7 +589,7 @@ const Admin = () => {
                   Pendentes
                 </h3>
                 <p className="text-3xl font-bold text-rose-gold">
-                  {loading ? '...' : stats?.statusBreakdown?.find((s: any) => s._id === 'pendente')?.count || 0}
+                  {loading ? '...' : stats ? stats.statusBreakdown?.find((s: any) => s._id === 'pendente')?.count || 0 : '❌'}
                 </p>
                 <p className="text-gray-600 text-sm">Aguardando</p>
               </motion.div>
@@ -1094,11 +1088,21 @@ const Admin = () => {
               </div>
             </div>
 
-            {/* Nota sobre integração */}
-            <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>✨ Painel Funcional:</strong> Todas as funcionalidades básicas estão operacionais. 
-                Os dados são sincronizados com as APIs do sistema e atualizados em tempo real.
+            {/* Status da conexão */}
+            <div className={`mt-8 p-4 border rounded-lg ${
+              stats ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+            }`}>
+              <p className={`text-sm ${stats ? 'text-green-800' : 'text-red-800'}`}>
+                {stats ? (
+                  <>
+                    <strong>✅ Sistema Online:</strong> Conectado ao Firebase. Dados em tempo real.
+                  </>
+                ) : (
+                  <>
+                    <strong>❌ Sistema Offline:</strong> Não foi possível conectar ao Firebase. 
+                    Verifique sua conexão com a internet e tente atualizar os dados.
+                  </>
+                )}
               </p>
             </div>
               </>

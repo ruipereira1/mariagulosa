@@ -10,9 +10,25 @@
     
     <!-- Prevenir erros de extensões do navegador -->
     <script>
-      // Prevenir erro de initExternalDomAPI
+      // Prevenir erro de initExternalDomAPI e outros erros de extensões
       if (typeof window !== 'undefined') {
         window.initExternalDomAPI = window.initExternalDomAPI || function() {};
+        
+        // Suprimir erros de extensões do navegador
+        window.addEventListener('error', function(e) {
+          if (e.message && e.message.includes('initExternalDomAPI')) {
+            e.preventDefault();
+            return false;
+          }
+        });
+        
+        // Suprimir erros de promise rejeitadas de extensões
+        window.addEventListener('unhandledrejection', function(e) {
+          if (e.reason && e.reason.toString().includes('initExternalDomAPI')) {
+            e.preventDefault();
+            return false;
+          }
+        });
       }
     </script>
   </head>
