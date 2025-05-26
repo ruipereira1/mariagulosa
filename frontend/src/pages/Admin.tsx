@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Lock, User, Eye, EyeOff, RefreshCw, Plus, Edit, Trash2, Save, X, Package, BarChart3 } from 'lucide-react'
+import { Lock, User, Eye, EyeOff, RefreshCw, Plus, Edit, Trash2, Save, X, Package, BarChart3, FileText, Download, AlertTriangle } from 'lucide-react'
 import { API_ENDPOINTS } from '../config/api'
+import { 
+  exportOrdersToPDF, 
+  exportCakesToPDF, 
+  exportOrdersToExcel, 
+  exportCakesToExcel, 
+  exportCompleteReport 
+} from '../utils/exportUtils'
 
 const Admin = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -26,6 +33,8 @@ const Admin = () => {
   const [cakes, setCakes] = useState<any[]>([])
   const [editingCake, setEditingCake] = useState<any>(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -306,21 +315,81 @@ const Admin = () => {
 
 
   const handleExportData = () => {
-    const data = {
-      stats,
-      orders,
-      exportDate: new Date().toISOString()
+    setShowExportMenu(!showExportMenu)
+  }
+
+  const handleExportPDF = (type: 'orders' | 'cakes' | 'complete') => {
+    try {
+      switch (type) {
+        case 'orders':
+          exportOrdersToPDF(orders, stats)
+          showNotification('📄 Relatório de pedidos exportado em PDF!')
+          break
+        case 'cakes':
+          exportCakesToPDF(cakes)
+          showNotification('📄 Catálogo de bolos exportado em PDF!')
+          break
+        case 'complete':
+          exportCompleteReport(orders, cakes, stats)
+          showNotification('📄 Relatório completo exportado em PDF!')
+          break
+      }
+    } catch (error) {
+      showNotification('❌ Erro ao exportar PDF!')
+      console.error('Erro na exportação PDF:', error)
     }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `maria-gulosa-dados-${new Date().toISOString().split('T')[0]}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    showNotification('Dados exportados com sucesso!')
+    setShowExportMenu(false)
+  }
+
+  const handleExportExcel = (type: 'orders' | 'cakes') => {
+    try {
+      switch (type) {
+        case 'orders':
+          exportOrdersToExcel(orders, stats)
+          showNotification('📊 Dados de pedidos exportados em Excel!')
+          break
+        case 'cakes':
+          exportCakesToExcel(cakes)
+          showNotification('📊 Catálogo de bolos exportado em Excel!')
+          break
+      }
+    } catch (error) {
+      showNotification('❌ Erro ao exportar Excel!')
+      console.error('Erro na exportação Excel:', error)
+    }
+    setShowExportMenu(false)
+  }
+
+  const handleResetOrders = async () => {
+    try {
+      setLoading(true)
+      
+      const response = await fetch('/api/reset-orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          adminKey: 'maria-reset-2024'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        showNotification(`✅ ${data.message}`)
+        // Recarregar dados
+        await loadDashboardData()
+      } else {
+        showNotification(`❌ Erro: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Erro ao fazer reset:', error)
+      showNotification('❌ Erro ao fazer reset das encomendas!')
+    } finally {
+      setLoading(false)
+      setShowResetModal(false)
+    }
   }
 
   const handleUpdateOrderStatus = async (orderNumber: string, newStatus: string) => {
@@ -369,6 +438,20 @@ const Admin = () => {
       loadDashboardData()
     }
   }, [isLoggedIn])
+
+  // Fechar menu de exportação ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showExportMenu) {
+        setShowExportMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showExportMenu])
 
   if (isLoggedIn) {
     return (
@@ -624,7 +707,7 @@ const Admin = () => {
               <h2 className="font-dancing text-3xl text-chocolate mb-6 text-center">
                 Ações Rápidas
               </h2>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <button 
                   onClick={handleRefreshData}
                   disabled={loading}
@@ -635,24 +718,137 @@ const Admin = () => {
                 </button>
                 <button 
                   onClick={handleAddCake}
-                  className="btn-secondary w-full"
+                  className="btn-secondary w-full flex items-center justify-center space-x-2"
                 >
-                  ➕ Adicionar Novo Bolo
+                  <Plus className="w-4 h-4" />
+                  <span>Adicionar Bolo</span>
                 </button>
-                <button 
-                  onClick={handleExportData}
-                  className="btn-secondary w-full"
-                >
-                  📊 Exportar Dados
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={handleExportData}
+                    className="btn-secondary w-full flex items-center justify-center space-x-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Exportar Dados</span>
+                  </button>
+                  
+                  {/* Menu de Exportação */}
+                  {showExportMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
+                    >
+                      <div className="p-2">
+                        <div className="text-xs font-medium text-gray-500 px-3 py-2 border-b">
+                          Exportar PDF
+                        </div>
+                        <button
+                          onClick={() => handleExportPDF('orders')}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center space-x-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>Relatório de Pedidos</span>
+                        </button>
+                        <button
+                          onClick={() => handleExportPDF('cakes')}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center space-x-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>Catálogo de Bolos</span>
+                        </button>
+                        <button
+                          onClick={() => handleExportPDF('complete')}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center space-x-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>Relatório Completo</span>
+                        </button>
+                        
+                        <div className="text-xs font-medium text-gray-500 px-3 py-2 border-b border-t mt-2">
+                          Exportar Excel
+                        </div>
+                        <button
+                          onClick={() => handleExportExcel('orders')}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center space-x-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Dados de Pedidos</span>
+                        </button>
+                        <button
+                          onClick={() => handleExportExcel('cakes')}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center space-x-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Dados de Bolos</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
                 <button 
                   onClick={() => window.open('/cardapio', '_blank')}
-                  className="btn-secondary w-full"
+                  className="btn-secondary w-full flex items-center justify-center space-x-2"
                 >
-                  👁️ Ver Catálogo
+                  <Eye className="w-4 h-4" />
+                  <span>Ver Catálogo</span>
+                </button>
+                <button 
+                  onClick={() => setShowResetModal(true)}
+                  className="bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg w-full flex items-center justify-center space-x-2"
+                >
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>Reset Encomendas</span>
                 </button>
               </div>
             </div>
+
+            {/* Modal de Confirmação de Reset */}
+            {showResetModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                onClick={() => setShowResetModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-white rounded-2xl p-6 max-w-md w-full"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="text-center">
+                    <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                    <h3 className="font-dancing text-2xl text-chocolate mb-4">
+                      Confirmar Reset
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Esta ação irá <strong>remover permanentemente</strong> todas as encomendas do sistema. 
+                      Esta operação não pode ser desfeita.
+                    </p>
+                    <p className="text-sm text-red-600 mb-6">
+                      ⚠️ Certifique-se de ter exportado os dados importantes antes de continuar.
+                    </p>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={handleResetOrders}
+                        disabled={loading}
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-full transition-all duration-300 flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loading ? 'Removendo...' : 'Confirmar Reset'}
+                      </button>
+                      <button
+                        onClick={() => setShowResetModal(false)}
+                        disabled={loading}
+                        className="btn-secondary flex-1 disabled:opacity-50"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
 
             {/* Modal para adicionar bolo */}
             {showAddCake && (
