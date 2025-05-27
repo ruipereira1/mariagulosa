@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useState, ReactNode } from 'react'
 import { CartItem, CakeData } from '../types'
 
 interface CartContextType {
@@ -17,15 +17,7 @@ interface CartContextType {
   closeModal: () => void
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined)
-
-export const useCart = () => {
-  const context = useContext(CartContext)
-  if (!context) {
-    throw new Error('useCart deve ser usado dentro de um CartProvider')
-  }
-  return context
-}
+export const CartContext = createContext<CartContextType | undefined>(undefined)
 
 interface CartProviderProps {
   children: ReactNode
@@ -146,4 +138,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       {children}
     </CartContext.Provider>
   )
-} 
+}
+
+ 

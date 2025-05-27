@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { apiCache } from '../utils/performance'
+import { CakeData, OrderData, StatsData, ApiResponse } from '../types'
 
 interface UseOptimizedApiOptions {
   cacheKey?: string
@@ -15,7 +16,7 @@ interface ApiState<T> {
   refetch: () => Promise<void>
 }
 
-export const useOptimizedApi = <T = any>(
+export const useOptimizedApi = <T = unknown>(
   url: string,
   options: UseOptimizedApiOptions = {}
 ): ApiState<T> => {
@@ -77,7 +78,7 @@ export const useOptimizedApi = <T = any>(
       // Verificar cache primeiro
       const cachedData = apiCache.get(cacheKey)
       if (cachedData) {
-        setData(cachedData)
+        setData(cachedData as T)
         setLoading(false)
         return
       }
@@ -110,9 +111,9 @@ export const useOptimizedApi = <T = any>(
 
 // Hook específico para dados do admin
 export const useAdminData = () => {
-  const stats = useOptimizedApi('/api/stats', { cacheKey: 'admin-stats' })
-  const orders = useOptimizedApi('/api/orders?limit=10', { cacheKey: 'admin-orders' })
-  const cakes = useOptimizedApi('/api/manage-cakes', { cacheKey: 'admin-cakes' })
+  const stats = useOptimizedApi<ApiResponse<StatsData>>('/api/stats', { cacheKey: 'admin-stats' })
+  const orders = useOptimizedApi<ApiResponse<{ orders: OrderData[] }>>('/api/orders?limit=10', { cacheKey: 'admin-orders' })
+  const cakes = useOptimizedApi<ApiResponse<{ cakes: CakeData[] }>>('/api/manage-cakes', { cacheKey: 'admin-cakes' })
 
   const refetchAll = useCallback(async () => {
     await Promise.all([
@@ -120,12 +121,12 @@ export const useAdminData = () => {
       orders.refetch(),
       cakes.refetch()
     ])
-  }, [stats.refetch, orders.refetch, cakes.refetch])
+  }, [stats, orders, cakes])
 
   return {
-    stats: stats.data,
-    orders: orders.data?.orders || [],
-    cakes: cakes.data?.cakes || [],
+    stats: stats.data?.data,
+    orders: orders.data?.data?.orders || [],
+    cakes: cakes.data?.data?.cakes || [],
     loading: stats.loading || orders.loading || cakes.loading,
     error: stats.error || orders.error || cakes.error,
     refetchAll

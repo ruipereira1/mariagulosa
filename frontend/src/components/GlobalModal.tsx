@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Plus, Minus, ShoppingCart } from 'lucide-react'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../hooks/useCart'
 
 const GlobalModal = () => {
   const [quantity, setQuantity] = useState(1)

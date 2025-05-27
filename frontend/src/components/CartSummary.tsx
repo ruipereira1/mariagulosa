@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingCart, X, Plus, Minus, MessageCircle, Trash2 } from 'lucide-react'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../hooks/useCart'
 import { API_ENDPOINTS } from '../config/api'
 import { CONTACTS } from '../config/contacts'
 import { useToast } from '../hooks/useToast'

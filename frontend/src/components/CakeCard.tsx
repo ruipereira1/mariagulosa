@@ -1,6 +1,6 @@
 import { Star, ShoppingCart } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../hooks/useCart'
 
 interface Cake {
   id: number

@@ -37,13 +37,14 @@ const OptimizedImage = ({
       }
     })
 
-    if (observer && imgRef.current) {
-      observer.observe(imgRef.current)
+    const currentImg = imgRef.current
+    if (observer && currentImg) {
+      observer.observe(currentImg)
     }
 
     return () => {
-      if (observer && imgRef.current) {
-        observer.unobserve(imgRef.current)
+      if (observer && currentImg) {
+        observer.unobserve(currentImg)
       }
     }
   }, [])

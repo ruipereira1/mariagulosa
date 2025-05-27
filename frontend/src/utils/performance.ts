@@ -8,7 +8,7 @@ export const LazyAdmin = lazy(() => import('../pages/Admin'))
 export const LazyCatalog = lazy(() => import('../pages/Catalog'))
 
 // Debounce para otimizar inputs
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -20,7 +20,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 }
 
 // Throttle para otimizar eventos de scroll/resize
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): ((...args: Parameters<T>) => void) => {
@@ -35,17 +35,19 @@ export const throttle = <T extends (...args: any[]) => any>(
 }
 
 // Memoização simples para cálculos custosos
-export const memoize = <T extends (...args: any[]) => any>(fn: T): T => {
-  const cache = new Map()
-  return ((...args: any[]) => {
+export const memoize = <Args extends readonly unknown[], Return>(
+  fn: (...args: Args) => Return
+): ((...args: Args) => Return) => {
+  const cache = new Map<string, Return>()
+  return (...args: Args): Return => {
     const key = JSON.stringify(args)
     if (cache.has(key)) {
-      return cache.get(key)
+      return cache.get(key)!
     }
     const result = fn(...args)
     cache.set(key, result)
     return result
-  }) as T
+  }
 }
 
 // Formatação de preços otimizada
@@ -96,10 +98,10 @@ export const preloadResource = (href: string, as: string) => {
 
 // Cache simples para requisições
 class SimpleCache {
-  private cache = new Map<string, { data: any; timestamp: number }>()
+  private cache = new Map<string, { data: unknown; timestamp: number }>()
   private ttl = 5 * 60 * 1000 // 5 minutos
 
-  set(key: string, data: any) {
+  set(key: string, data: unknown) {
     this.cache.set(key, { data, timestamp: Date.now() })
   }
 
@@ -126,7 +128,7 @@ export const apiCache = new SimpleCache()
 export const useSlowConnection = () => {
   if (typeof navigator === 'undefined') return false
   
-  const connection = (navigator as any).connection
+  const connection = (navigator as unknown as { connection?: { effectiveType: string } }).connection
   if (!connection) return false
   
   return connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g'

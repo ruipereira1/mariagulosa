@@ -10,6 +10,7 @@ import {
   exportCompleteReport 
 } from '../utils/exportUtils'
 import { DEFAULT_CAKES } from '../data/defaultCakes'
+import { CakeData, OrderData, StatsData } from '../types'
 
 const Admin = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -18,8 +19,8 @@ const Admin = () => {
     password: ''
   })
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [stats, setStats] = useState<any>(null)
-  const [orders, setOrders] = useState<any[]>([])
+  const [stats, setStats] = useState<StatsData | null>(null)
+  const [orders, setOrders] = useState<OrderData[]>([])
   const [loading, setLoading] = useState(false)
   const [showAddCake, setShowAddCake] = useState(false)
   const [newCake, setNewCake] = useState({
@@ -31,8 +32,8 @@ const Admin = () => {
   })
   const [notification, setNotification] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [cakes, setCakes] = useState<any[]>([])
-  const [editingCake, setEditingCake] = useState<any>(null)
+  const [cakes, setCakes] = useState<CakeData[]>([])
+  const [editingCake, setEditingCake] = useState<CakeData | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   const [showExportMenu, setShowExportMenu] = useState(false)
@@ -256,14 +257,14 @@ const Admin = () => {
     }
   }
 
-  const handleEditCake = (cake: any) => {
+  const handleEditCake = (cake: CakeData) => {
     setEditingCake(cake)
     setShowEditModal(true)
   }
 
   const handleUpdateCake = async () => {
     try {
-      if (!editingCake.name || !editingCake.price) {
+      if (!editingCake?.name || !editingCake?.price) {
         showNotification('Nome e preço são obrigatórios!')
         return
       }
@@ -278,7 +279,7 @@ const Admin = () => {
         body: JSON.stringify({
           id: editingCake.id,
           name: editingCake.name,
-          price: parseFloat(editingCake.price),
+          price: typeof editingCake.price === 'string' ? parseFloat(editingCake.price) : editingCake.price,
           description: editingCake.description,
           image: editingCake.image,
           category: editingCake.category,
@@ -346,15 +347,15 @@ const Admin = () => {
     try {
       switch (type) {
         case 'orders':
-          exportOrdersToPDF(orders, stats)
+          exportOrdersToPDF(orders as any, stats as any)
           showNotification('📄 Relatório de pedidos exportado em PDF!')
           break
         case 'cakes':
-          exportCakesToPDF(cakes)
+          exportCakesToPDF(cakes as any)
           showNotification('📄 Catálogo de bolos exportado em PDF!')
           break
         case 'complete':
-          exportCompleteReport(orders, cakes, stats)
+          exportCompleteReport(orders as any, cakes as any, stats as any)
           showNotification('📄 Relatório completo exportado em PDF!')
           break
       }
@@ -369,11 +370,11 @@ const Admin = () => {
     try {
       switch (type) {
         case 'orders':
-          exportOrdersToExcel(orders, stats)
+          exportOrdersToExcel(orders as any, stats as any)
           showNotification('📊 Dados de pedidos exportados em Excel!')
           break
         case 'cakes':
-          exportCakesToExcel(cakes)
+          exportCakesToExcel(cakes as any)
           showNotification('📊 Catálogo de bolos exportado em Excel!')
           break
       }
@@ -1078,7 +1079,7 @@ const Admin = () => {
                   <div className="flex justify-between">
                     <span>Ticket médio:</span>
                     <span className="font-medium">
-                      € {stats?.todayOrders > 0 ? (stats.todayRevenue / stats.todayOrders).toFixed(2) : '0,00'}
+                      € {(stats?.todayOrders && stats?.todayOrders > 0) ? (stats.todayRevenue / stats.todayOrders).toFixed(2) : '0,00'}
                     </span>
                   </div>
                 </div>
