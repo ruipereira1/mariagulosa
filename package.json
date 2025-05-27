@@ -2,11 +2,15 @@
   "name": "maria-gulosa",
   "version": "1.0.0",
   "type": "module",
-  "description": "Site da Maria Gulosa - Bolos artesanais",
+  "description": "Site de bolos artesanais Maria Gulosa",
+  "main": "index.js",
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
-    "dev": "vercel dev",
+    "dev": "vercel dev --yes",
+    "build": "cd frontend && npm run build",
     "start": "vercel dev",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "cd frontend && npm install",
+    "frontend": "cd frontend && npm run dev",
     "deploy": "vercel --prod",
     "deploy-dev": "vercel",
     "deploy-auto": "npm run build && vercel --prod",
@@ -15,9 +19,22 @@
     "clean": "cd frontend && rm -rf dist node_modules && npm install"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "firebase": "^10.7.1"
   },
-  "keywords": ["bolos", "confeitaria", "maria-gulosa"],
+  "keywords": [
+    "bolos",
+    "artesanais",
+    "vercel",
+    "react",
+    "firebase"
+  ],
   "author": "Maria Gulosa",
-  "license": "MIT"
-} 
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ruipereira1/mariagulosa/issues"
+  },
+  "homepage": "https://github.com/ruipereira1/mariagulosa#readme"
+}

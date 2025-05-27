@@ -1,7 +1,7 @@
 // Configuração da API para Vercel
 const API_CONFIG = {
   development: {
-    baseURL: 'http://localhost:3000', // Vercel dev
+    baseURL: 'http://localhost:3000', // Vercel dev server
   },
   production: {
     baseURL: '', // Mesmo domínio no Vercel
@@ -23,7 +23,7 @@ console.log('🔧 API Configuration:', {
   windowOrigin: typeof window !== 'undefined' ? window.location.origin : 'undefined'
 })
 
-// URLs completas da API
+// URLs completas da API - TODAS USANDO FIREBASE
 export const API_ENDPOINTS = {
   cakes: `${API_BASE_URL}/api/manage-cakes`,
   orders: `${API_BASE_URL}/api/orders`,
@@ -43,5 +43,10 @@ export const API_CONFIG_AXIOS = {
 
 // Log da configuração atual (apenas em desenvolvimento)
 if (isDevelopment) {
-  console.log('🔧 API Config:', { environment: 'development', baseURL: API_BASE_URL })
+  console.log('🔧 API Config:', { 
+    environment: 'development', 
+    baseURL: API_BASE_URL, 
+    endpoints: API_ENDPOINTS,
+    note: 'Using Firebase APIs via Vercel dev server'
+  })
 } 
